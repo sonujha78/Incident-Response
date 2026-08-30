@@ -1,0 +1,32 @@
+groups:
+  - name: redis_alerts
+    rules:
+      - alert: RedisEvictingKeys
+        expr: rate(redis_evicted_keys_total[5m]) > 0
+        for: 1m
+        labels:
+          severity: warning
+          service: redis
+        annotations:
+          summary: "Redis is silently evicting keys"
+          description: "Redis has evicted {{ $value }} keys/sec over the last 5 minutes. This can cause stale reads or unexpected cache misses. Check maxmemory and maxmemory-policy."
+
+      - alert: RedisMemoryNearLimit
+        expr: redis_memory_used_bytes / redis_memory_max_bytes > 0.90
+        for: 2m
+        labels:
+          severity: critical
+          service: redis
+        annotations:
+          summary: "Redis memory usage near maxmemory limit"
+          description: "Redis is using {{ $value | humanizePercentage }} of configured maxmemory. Writes may start failing with OOM errors soon."
+
+      - alert: RedisOOMErrors
+        expr: rate(redis_commands_failed_calls_total{cmd=~"set|get"}[5m]) > 0
+        for: 1m
+        labels:
+          severity: critical
+          service: redis
+        annotations:
+          summary: "Redis commands failing (possible OOM)"
+          description: "Redis SET/GET commands are failing. maxmemory may be set too low relative to baseline memory usage."

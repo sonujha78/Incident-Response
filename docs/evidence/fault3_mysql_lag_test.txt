@@ -1,0 +1,12 @@
+=== FAULT TEST: Generating heavy write load to expose single-threaded replication lag ===
+Sat Aug 29 04:57:20 PM IST 2026
+200 writes completed on primary
+Sat Aug 29 04:57:20 PM IST 2026
+--- Primary row count ---
+COUNT(*)
+216
+--- Replica row count (should be LESS if lagging) ---
+COUNT(*)
+216
+--- Seconds_Behind_Source ---
+        Seconds_Behind_Source: 0

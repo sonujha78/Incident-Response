@@ -1,0 +1,32 @@
+groups:
+  - name: mysql_replication_alerts
+    rules:
+      - alert: MySQLReplicaLagHigh
+        expr: mysql_slave_status_seconds_behind_master > 30
+        for: 1m
+        labels:
+          severity: warning
+          service: mysql-replica
+        annotations:
+          summary: "MySQL replica is lagging behind primary"
+          description: "Replica is {{ $value }}s behind the primary. Check replica_parallel_workers and disk I/O on the replica."
+
+      - alert: MySQLReplicaLagCritical
+        expr: mysql_slave_status_seconds_behind_master > 300
+        for: 1m
+        labels:
+          severity: critical
+          service: mysql-replica
+        annotations:
+          summary: "MySQL replica lag is critical (5+ minutes)"
+          description: "Replica is {{ $value }}s ({{ $value | humanizeDuration }}) behind primary. Reads from replica may be returning severely stale data."
+
+      - alert: MySQLReplicationStopped
+        expr: mysql_slave_status_slave_io_running == 0 or mysql_slave_status_slave_sql_running == 0
+        for: 30s
+        labels:
+          severity: critical
+          service: mysql-replica
+        annotations:
+          summary: "MySQL replication has stopped"
+          description: "Replica IO or SQL thread is not running. Replication is fully broken, not just lagging."

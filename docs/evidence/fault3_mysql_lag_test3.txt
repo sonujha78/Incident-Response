@@ -1,0 +1,18 @@
+=== FAULT TEST v3: TRUE CONCURRENT load (parallel curls) ===
+Sat Aug 29 05:01:54 PM IST 2026
+primary=5216 replica=5216 gap=0 seconds_behind=0
+primary=5216 replica=5216 gap=0 seconds_behind=0
+primary=5216 replica=5216 gap=0 seconds_behind=0
+primary=5216 replica=5216 gap=0 seconds_behind=0
+primary=5216 replica=5216 gap=0 seconds_behind=0
+primary=5216 replica=5216 gap=0 seconds_behind=0
+primary=5216 replica=5216 gap=0 seconds_behind=0
+primary=5216 replica=5216 gap=0 seconds_behind=0
+primary=5216 replica=5216 gap=0 seconds_behind=0
+primary=5216 replica=5216 gap=0 seconds_behind=0
+primary=5216 replica=5216 gap=0 seconds_behind=0
+primary=5216 replica=5216 gap=0 seconds_behind=0
+primary=5216 replica=5216 gap=0 seconds_behind=0
+primary=5216 replica=5216 gap=0 seconds_behind=0
+primary=5216 replica=5216 gap=0 seconds_behind=0
+Load finished

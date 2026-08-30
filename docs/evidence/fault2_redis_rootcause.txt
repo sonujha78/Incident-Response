@@ -1,0 +1,16 @@
+=== ROOT CAUSE: Redis maxmemory set below baseline overhead ===
+Sat Aug 29 04:46:39 PM IST 2026
+
+--- Redis memory stats ---
+used_memory:1189480
+used_memory_human:1.13M
+maxmemory:1048576
+maxmemory_human:1.00M
+maxmemory_policy:allkeys-lru
+
+--- Redis rejects new writes (OOM) ---
+OOM command not allowed when used memory > 'maxmemory'.
+
+
+--- App-level impact (GET /items) ---
+{"error":"OOM command not allowed when used memory > 'maxmemory'."}

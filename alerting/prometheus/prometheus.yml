@@ -1,0 +1,38 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ["alertmanager:9093"]
+
+rule_files:
+  - "/etc/prometheus/rules/*.yml"
+
+scrape_configs:
+  - job_name: 'nginx'
+    static_configs:
+      - targets: ['nginx-exporter:9113']
+
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis-exporter:9121']
+
+  - job_name: 'mysql-primary'
+    static_configs:
+      - targets: ['mysql-exporter-primary:9104']
+
+  - job_name: 'mysql-replica'
+    static_configs:
+      - targets: ['mysql-exporter-replica:9104']
+
+# NOTE: Logstash is intentionally NOT scraped here.
+# Logstash's built-in /_node/stats endpoint returns plain JSON, not
+# Prometheus exposition format, and requires the
+# logstash-integration-prometheus plugin (not present in the stock
+# docker.elastic.co image) to expose /_prometheus/metrics instead.
+# Logstash pipeline health (silent drops, filter errors) is instead
+# monitored via a scheduled Elasticsearch document-count comparison
+# (input events vs. indexed events) - see rules/logstash_alerts.yml
+# and docs/alerting-logstash-monitoring.md for the equivalent check.

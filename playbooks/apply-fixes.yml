@@ -1,0 +1,138 @@
+---
+- name: Apply Verified Fixes for All 4 Root Causes
+  hosts: swarm_manager
+  become: false
+  vars:
+    stack_name: incident
+    roles_dir: "{{ playbook_dir }}/../roles"
+    stack_dir: "{{ playbook_dir }}/../stack"
+
+  tasks:
+    # ---------- FIX 1: Nginx ----------
+    - name: "[Fix 1] Restore working Nginx health-check config"
+      ansible.builtin.copy:
+        dest: "{{ roles_dir }}/nginx/files/nginx.conf"
+        content: |
+          events {
+              worker_connections 1024;
+          }
+          http {
+              upstream api_backend {
+                  server crud-api-1:3000 max_fails=3 fail_timeout=10s;
+                  server crud-api-2:3000 max_fails=3 fail_timeout=10s;
+              }
+              server {
+                  listen 80;
+                  location / {
+                      proxy_pass http://api_backend;
+                      proxy_set_header Host $host;
+                      proxy_set_header X-Real-IP $remote_addr;
+                      proxy_connect_timeout 2s;
+                      proxy_read_timeout 5s;
+                      proxy_next_upstream error timeout http_502 http_503 http_504;
+                  }
+                  location /nginx-health {
+                      return 200 "nginx ok\n";
+                  }
+                  location /stub_status {
+                      stub_status;
+                      allow all;
+                  }
+              }
+          }
+      tags: [fix1, nginx]
+
+    # ---------- FIX 2: Redis ----------
+    - name: "[Fix 2] Restore healthy Redis maxmemory"
+      ansible.builtin.copy:
+        dest: "{{ roles_dir }}/redis/files/redis.conf"
+        content: |
+          maxmemory 256mb
+          maxmemory-policy allkeys-lru
+          appendonly no
+      tags: [fix2, redis]
+
+    # ---------- FIX 3: MySQL ----------
+    - name: "[Fix 3] Restore parallel replication on MySQL replica"
+      ansible.builtin.copy:
+        dest: "{{ roles_dir }}/mysql/files/my-replica.cnf"
+        content: |
+          [mysqld]
+          server-id=2
+          relay-log=relay-bin
+          gtid_mode=ON
+          enforce_gtid_consistency=ON
+          read_only=ON
+          replica_parallel_workers=4
+          replica_parallel_type=LOGICAL_CLOCK
+      tags: [fix3, mysql]
+
+    # ---------- FIX 4: Logstash ----------
+    - name: "[Fix 4] Replace drop filter with safe fallback in Logstash pipeline"
+      ansible.builtin.copy:
+        dest: "{{ roles_dir }}/elk/files/logstash.conf"
+        content: |
+          input {
+            tcp {
+              port => 5000
+              codec => json_lines
+            }
+          }
+          filter {
+            mutate {
+              add_field => { "environment" => "production" }
+            }
+            date {
+              match => [ "timestamp", "ISO8601" ]
+              target => "@timestamp"
+            }
+            if ![service] {
+              mutate {
+                add_field => { "service" => "unknown" }
+              }
+            }
+          }
+          output {
+            elasticsearch {
+              hosts => ["http://elasticsearch:9200"]
+              index => "app-logs-%{+YYYY.MM.dd}"
+            }
+            stdout { codec => rubydebug }
+          }
+      tags: [fix4, logstash]
+
+    - name: Roll out all fixes (rolling update, one replica at a time)
+      community.docker.docker_stack:
+        state: present
+        name: "{{ stack_name }}"
+        compose:
+          - "{{ stack_dir }}/docker-stack.yml"
+      tags: [fix1, fix2, fix3, fix4, nginx, redis, mysql, logstash]
+      register: deploy_result
+      failed_when:
+        - deploy_result is failed
+        - "'only updates to Labels are allowed' not in (deploy_result.stderr | default(''))"
+
+    - name: Re-establish MySQL replication link after replica restart
+      community.docker.docker_container_exec:
+        container: "{{ lookup('pipe', 'docker ps -q -f name=' + stack_name + '_mysql-replica') }}"
+        command: >
+          mysql -uroot -prootpass -e
+          "STOP REPLICA; CHANGE REPLICATION SOURCE TO
+           SOURCE_HOST='{{ stack_name }}_mysql-primary',
+           SOURCE_USER='repl', SOURCE_PASSWORD='replpass', SOURCE_AUTO_POSITION=1;
+           START REPLICA;"
+      tags: [fix3, mysql]
+      ignore_errors: true
+
+    - name: Verify replication health after fix
+      community.docker.docker_container_exec:
+        container: "{{ lookup('pipe', 'docker ps -q -f name=' + stack_name + '_mysql-replica') }}"
+        command: mysql -uroot -prootpass -e "SHOW REPLICA STATUS\G"
+      register: replica_status
+      tags: [fix3, mysql]
+
+    - name: Display replication status
+      ansible.builtin.debug:
+        var: replica_status.stdout_lines
+      tags: [fix3, mysql]

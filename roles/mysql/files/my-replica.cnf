@@ -1,0 +1,8 @@
+[mysqld]
+server-id=2
+relay-log=relay-bin
+gtid_mode=ON
+enforce_gtid_consistency=ON
+read_only=ON
+replica_parallel_workers=4
+replica_parallel_type=LOGICAL_CLOCK

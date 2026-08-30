@@ -1,0 +1,11 @@
+=== BEFORE: Logstash healthy, all logs indexed ===
+Sat Aug 29 08:12:45 PM IST 2026
+{
+  "count" : 11,
+  "_shards" : {
+    "total" : 1,
+    "successful" : 1,
+    "skipped" : 0,
+    "failed" : 0
+  }
+}

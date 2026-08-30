@@ -1,0 +1,13 @@
+=== FAULT TEST v2: Heavy background load + live lag monitoring ===
+Sat Aug 29 05:00:15 PM IST 2026
+primary=934 replica=938 gap=-4 seconds_behind=
+primary=1098 replica=1103 gap=-5 seconds_behind=
+primary=1250 replica=1255 gap=-5 seconds_behind=
+primary=1442 replica=1447 gap=-5 seconds_behind=
+primary=1610 replica=1616 gap=-6 seconds_behind=
+primary=1772 replica=1777 gap=-5 seconds_behind=
+primary=1929 replica=1934 gap=-5 seconds_behind=
+primary=2082 replica=2088 gap=-6 seconds_behind=
+primary=2216 replica=2216 gap=0 seconds_behind=
+primary=2216 replica=2216 gap=0 seconds_behind=
+Load finished

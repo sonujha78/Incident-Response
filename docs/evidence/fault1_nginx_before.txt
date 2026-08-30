@@ -1,0 +1,12 @@
+=== BEFORE: Nginx routing to both replicas (baseline) ===
+Sat Aug 29 03:24:05 PM IST 2026
+{"status":"ok","host":"9200a0fd8870"}
+{"status":"ok","host":"5cf2d15b746a"}
+{"status":"ok","host":"9200a0fd8870"}
+{"status":"ok","host":"5cf2d15b746a"}
+{"status":"ok","host":"9200a0fd8870"}
+{"status":"ok","host":"5cf2d15b746a"}
+{"status":"ok","host":"9200a0fd8870"}
+{"status":"ok","host":"5cf2d15b746a"}
+{"status":"ok","host":"9200a0fd8870"}
+{"status":"ok","host":"5cf2d15b746a"}

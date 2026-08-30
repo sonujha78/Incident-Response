@@ -1,0 +1,6 @@
+[mysqld]
+server-id=1
+log-bin=mysql-bin
+binlog_do_db=appdb
+gtid_mode=ON
+enforce_gtid_consistency=ON

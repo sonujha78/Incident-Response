@@ -1,0 +1,32 @@
+groups:
+  - name: logstash_pipeline_alerts
+    rules:
+      - alert: LogstashPipelineErrors
+        expr: rate(logstash_node_pipeline_events_duration_seconds[5m]) == 0 and rate(logstash_node_pipeline_events_in_total[5m]) > 0
+        for: 2m
+        labels:
+          severity: critical
+          service: logstash
+        annotations:
+          summary: "Logstash pipeline processing errors detected"
+          description: "Events are entering the pipeline but not completing processing, indicating filter exceptions or drops."
+
+      - alert: LogstashEventDropRate
+        expr: (rate(logstash_node_pipeline_events_in_total[5m]) - rate(logstash_node_pipeline_events_out_total[5m])) > 0
+        for: 2m
+        labels:
+          severity: critical
+          service: logstash
+        annotations:
+          summary: "Logstash is dropping events silently"
+          description: "Input event rate ({{ $value }}/s higher than output rate) indicates events are being filtered/dropped in the pipeline, e.g. by an unconditional drop{} filter or an unhandled filter exception."
+
+      - alert: LogstashJVMHeapHigh
+        expr: logstash_jvm_mem_heap_used_percent > 85
+        for: 5m
+        labels:
+          severity: warning
+          service: logstash
+        annotations:
+          summary: "Logstash JVM heap usage high"
+          description: "JVM heap usage is at {{ $value }}%. Sustained high heap usage can cause GC pauses and event backpressure/drops."

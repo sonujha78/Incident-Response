@@ -1,0 +1,6 @@
+=== FAULT TEST v2: With event.cancel() on exception ===
+Sat Aug 29 08:21:20 PM IST 2026
+Count before test: 21
+Sent 10 logs total (5 valid + 5 missing 'service' field)
+Count after test: 31
+Expected increase: 10, Actual increase: 10

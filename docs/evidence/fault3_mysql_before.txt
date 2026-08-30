@@ -1,0 +1,8 @@
+=== BEFORE: MySQL replication baseline ===
+Sat Aug 29 04:52:08 PM IST 2026
+           Replica_IO_Running: Yes
+          Replica_SQL_Running: Yes
+        Seconds_Behind_Source: 0
+    Replica_SQL_Running_State: Replica has read all relay log; waiting for more updates
+Variable_name	Value
+replica_parallel_workers	4

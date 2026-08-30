@@ -1,0 +1,72 @@
+---
+- name: Deploy Incident Response Stack via Docker Swarm
+  hosts: swarm_manager
+  become: false
+  vars:
+    stack_name: incident
+    stack_dir: "{{ playbook_dir }}/../stack"
+
+  tasks:
+    - name: Ensure Docker Swarm is initialized
+      community.docker.docker_swarm:
+        state: present
+      register: swarm_info
+      failed_when: false
+
+    - name: Deploy the full application + monitoring stack
+      community.docker.docker_stack:
+        state: present
+        name: "{{ stack_name }}"
+        compose:
+          - "{{ stack_dir }}/docker-stack.yml"
+        prune: true
+
+    - name: Wait for core services to report at least 1 running replica
+      community.docker.docker_stack_task_info:
+        stack: "{{ stack_name }}"
+      register: stack_tasks
+      until: stack_tasks.tasks | selectattr('DesiredState', 'equalto', 'running') | list | length > 0
+      retries: 10
+      delay: 10
+
+    - name: Create MySQL replication user on primary
+      community.docker.docker_container_exec:
+        container: "{{ lookup('pipe', 'docker ps -q -f name=' + stack_name + '_mysql-primary') }}"
+        command: >
+          mysql -uroot -prootpass -e
+          "CREATE USER IF NOT EXISTS 'repl'@'%' IDENTIFIED WITH mysql_native_password BY 'replpass';
+           GRANT REPLICATION SLAVE ON *.* TO 'repl'@'%'; FLUSH PRIVILEGES;"
+      register: repl_user_result
+      retries: 5
+      delay: 10
+      until: repl_user_result is not failed
+
+    - name: Create monitoring exporter user on primary
+      community.docker.docker_container_exec:
+        container: "{{ lookup('pipe', 'docker ps -q -f name=' + stack_name + '_mysql-primary') }}"
+        command: >
+          mysql -uroot -prootpass -e
+          "CREATE USER IF NOT EXISTS 'exporter'@'%' IDENTIFIED WITH mysql_native_password BY 'exporterpass';
+           GRANT PROCESS, REPLICATION CLIENT, SELECT ON *.* TO 'exporter'@'%'; FLUSH PRIVILEGES;"
+
+    - name: Create monitoring exporter user on replica
+      community.docker.docker_container_exec:
+        container: "{{ lookup('pipe', 'docker ps -q -f name=' + stack_name + '_mysql-replica') }}"
+        command: >
+          mysql -uroot -prootpass -e
+          "CREATE USER IF NOT EXISTS 'exporter'@'%' IDENTIFIED WITH mysql_native_password BY 'exporterpass';
+           GRANT PROCESS, REPLICATION CLIENT, SELECT ON *.* TO 'exporter'@'%'; FLUSH PRIVILEGES;"
+
+    - name: Point replica at primary and start replication
+      community.docker.docker_container_exec:
+        container: "{{ lookup('pipe', 'docker ps -q -f name=' + stack_name + '_mysql-replica') }}"
+        command: >
+          mysql -uroot -prootpass -e
+          "STOP REPLICA; CHANGE REPLICATION SOURCE TO
+           SOURCE_HOST='{{ stack_name }}_mysql-primary',
+           SOURCE_USER='repl', SOURCE_PASSWORD='replpass', SOURCE_AUTO_POSITION=1;
+           START REPLICA;"
+
+    - name: Report deployed services
+      ansible.builtin.debug:
+        msg: "Stack '{{ stack_name }}' deployed. Run 'docker stack services {{ stack_name }}' to verify."

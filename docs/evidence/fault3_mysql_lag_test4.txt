@@ -1,0 +1,39 @@
+=== FAULT TEST v4: Bulk direct SQL insert (50k rows) ===
+Sat Aug 29 05:04:03 PM IST 2026
+primary=5216 replica=5231 gap=-15 seconds_behind=0
+primary=5935 replica=5596 gap=339 seconds_behind=0
+primary=6648 replica=5945 gap=703 seconds_behind=0
+primary=7369 replica=6279 gap=1090 seconds_behind=0
+primary=8061 replica=6627 gap=1434 seconds_behind=0
+primary=8758 replica=6969 gap=1789 seconds_behind=0
+primary=9438 replica=7330 gap=2108 seconds_behind=0
+primary=10146 replica=7667 gap=2479 seconds_behind=4
+primary=10829 replica=8021 gap=2808 seconds_behind=0
+primary=11537 replica=8366 gap=3171 seconds_behind=0
+primary=12233 replica=8725 gap=3508 seconds_behind=0
+primary=12936 replica=9080 gap=3856 seconds_behind=7
+primary=13625 replica=9437 gap=4188 seconds_behind=0
+primary=14334 replica=9779 gap=4555 seconds_behind=0
+primary=15053 replica=10127 gap=4926 seconds_behind=0
+primary=15743 replica=10475 gap=5268 seconds_behind=0
+primary=16459 replica=10825 gap=5634 seconds_behind=0
+primary=17189 replica=11166 gap=6023 seconds_behind=0
+primary=17862 replica=11514 gap=6348 seconds_behind=0
+primary=18575 replica=11870 gap=6705 seconds_behind=11
+Bulk insert finished on primary
+--- Peak lag while catching up ---
+primary=55216 replica=37333 gap=17883 seconds_behind=0
+primary=55216 replica=38424 gap=16792 seconds_behind=0
+primary=55216 replica=39496 gap=15720 seconds_behind=55
+primary=55216 replica=40585 gap=14631 seconds_behind=56
+primary=55216 replica=41675 gap=13541 seconds_behind=57
+primary=55216 replica=42776 gap=12440 seconds_behind=59
+primary=55216 replica=43845 gap=11371 seconds_behind=61
+primary=55216 replica=44931 gap=10285 seconds_behind=62
+primary=55216 replica=46003 gap=9213 seconds_behind=0
+primary=55216 replica=47087 gap=8129 seconds_behind=64
+--- Peak lag observed: seconds_behind_source reached 64s, row gap reached ~17,883 rows ---
+--- Replica fully caught up at 55216 rows ---
+--- Root cause: replica_parallel_workers=0 forces single-threaded SQL apply thread ---
+Variable_name	Value
+replica_parallel_workers	0

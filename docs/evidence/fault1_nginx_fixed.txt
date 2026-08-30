@@ -1,0 +1,22 @@
+=== AFTER FIX: All requests should succeed, unhealthy server auto-excluded ===
+Sat Aug 29 03:45:04 PM IST 2026
+HTTP:200 time:0.001750s
+HTTP:200 time:0.001359s
+HTTP:200 time:0.001745s
+HTTP:200 time:0.001339s
+HTTP:200 time:0.001429s
+HTTP:200 time:0.001391s
+HTTP:200 time:0.001246s
+HTTP:200 time:0.001330s
+HTTP:200 time:0.001349s
+HTTP:200 time:0.001466s
+HTTP:200 time:0.001438s
+HTTP:200 time:0.001498s
+HTTP:200 time:0.002066s
+HTTP:200 time:0.001627s
+HTTP:200 time:0.001694s
+HTTP:200 time:0.001258s
+HTTP:200 time:0.001769s
+HTTP:200 time:0.002221s
+HTTP:200 time:0.001215s
+HTTP:200 time:0.001051s

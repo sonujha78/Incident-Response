@@ -1,0 +1,6 @@
+=== AFTER FIX: Missing 'service' field logs should now be preserved (with fallback) ===
+Sat Aug 29 08:33:45 PM IST 2026
+Count before test: 36
+Sent 10 logs total (5 valid + 5 missing 'service' field)
+Count after test: 46
+Expected increase: 10, Actual increase: 10

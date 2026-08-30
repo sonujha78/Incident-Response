@@ -1,0 +1,23 @@
+=== AFTER FIX: Same 50k bulk insert test with replica_parallel_workers=4 ===
+Sat Aug 29 08:08:45 PM IST 2026
+primary=55216 replica=55239 gap=-23 seconds_behind=0
+primary=55945 replica=55896 gap=49 seconds_behind=0
+primary=56684 replica=56580 gap=104 seconds_behind=0
+primary=57399 replica=57242 gap=157 seconds_behind=0
+primary=58124 replica=57917 gap=207 seconds_behind=1
+primary=58854 replica=58568 gap=286 seconds_behind=1
+primary=59566 replica=59199 gap=367 seconds_behind=1
+primary=60286 replica=59863 gap=423 seconds_behind=1
+primary=60998 replica=60515 gap=483 seconds_behind=1
+primary=61746 replica=61219 gap=527 seconds_behind=1
+primary=62481 replica=61871 gap=610 seconds_behind=1
+primary=63220 replica=62525 gap=695 seconds_behind=1
+primary=63944 replica=63193 gap=751 seconds_behind=1
+primary=64697 replica=63874 gap=823 seconds_behind=1
+primary=65458 replica=64554 gap=904 seconds_behind=2
+primary=66238 replica=65251 gap=987 seconds_behind=2
+primary=66963 replica=65932 gap=1031 seconds_behind=2
+primary=67735 replica=66624 gap=1111 seconds_behind=2
+primary=68456 replica=67282 gap=1174 seconds_behind=2
+primary=69204 replica=67967 gap=1237 seconds_behind=3
+Bulk insert finished on primary

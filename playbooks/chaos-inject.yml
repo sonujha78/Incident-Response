@@ -1,0 +1,127 @@
+---
+- name: Inject Intentional Production Faults (Chaos)
+  hosts: swarm_manager
+  become: false
+  vars:
+    stack_name: incident
+    roles_dir: "{{ playbook_dir }}/../roles"
+    stack_dir: "{{ playbook_dir }}/../stack"
+
+  tasks:
+    # ---------- FAULT 1: Nginx health check disabled ----------
+    - name: "[Fault 1] Write broken Nginx config (max_fails=0 on one upstream)"
+      ansible.builtin.copy:
+        dest: "{{ roles_dir }}/nginx/files/nginx.conf"
+        content: |
+          events {
+              worker_connections 1024;
+          }
+          http {
+              upstream api_backend {
+                  server crud-api-1:3000 max_fails=3 fail_timeout=10s;
+                  server crud-api-2:3000 max_fails=0;
+              }
+              server {
+                  listen 80;
+                  location / {
+                      proxy_pass http://api_backend;
+                      proxy_set_header Host $host;
+                      proxy_set_header X-Real-IP $remote_addr;
+                      proxy_connect_timeout 2s;
+                      proxy_read_timeout 5s;
+                  }
+                  location /nginx-health {
+                      return 200 "nginx ok\n";
+                  }
+                  location /stub_status {
+                      stub_status;
+                      allow all;
+                  }
+              }
+          }
+      tags: [fault1, nginx]
+
+    # ---------- FAULT 2: Redis maxmemory too low ----------
+    - name: "[Fault 2] Write broken Redis config (maxmemory below baseline)"
+      ansible.builtin.copy:
+        dest: "{{ roles_dir }}/redis/files/redis.conf"
+        content: |
+          maxmemory 1mb
+          maxmemory-policy allkeys-lru
+          appendonly no
+      tags: [fault2, redis]
+
+    # ---------- FAULT 3: MySQL single-threaded replication ----------
+    - name: "[Fault 3] Write broken MySQL replica config (single-threaded apply)"
+      ansible.builtin.copy:
+        dest: "{{ roles_dir }}/mysql/files/my-replica.cnf"
+        content: |
+          [mysqld]
+          server-id=2
+          relay-log=relay-bin
+          gtid_mode=ON
+          enforce_gtid_consistency=ON
+          read_only=ON
+          replica_parallel_workers=0
+          sync_relay_log=1
+          sync_relay_log_info=1
+      tags: [fault3, mysql]
+
+    # ---------- FAULT 4: Logstash silent drop ----------
+    - name: "[Fault 4] Write broken Logstash pipeline (unconditional drop filter)"
+      ansible.builtin.copy:
+        dest: "{{ roles_dir }}/elk/files/logstash.conf"
+        content: |
+          input {
+            tcp {
+              port => 5000
+              codec => json_lines
+            }
+          }
+          filter {
+            mutate {
+              add_field => { "environment" => "production" }
+            }
+            date {
+              match => [ "timestamp", "ISO8601" ]
+              target => "@timestamp"
+            }
+            ruby {
+              code => "
+                if event.get('service').nil?
+                  event.tag('_dropped_missing_service')
+                end
+              "
+            }
+            if "_dropped_missing_service" in [tags] {
+              drop { }
+            }
+          }
+          output {
+            elasticsearch {
+              hosts => ["http://elasticsearch:9200"]
+              index => "app-logs-%{+YYYY.MM.dd}"
+            }
+            stdout { codec => rubydebug }
+          }
+      tags: [fault4, logstash]
+
+    - name: Redeploy stack with injected faults (rolling, one service at a time)
+      community.docker.docker_stack:
+        state: present
+        name: "{{ stack_name }}"
+        compose:
+          - "{{ stack_dir }}/docker-stack.yml"
+      tags: [fault1, fault2, fault3, fault4, nginx, redis, mysql, logstash]
+      register: deploy_result
+      failed_when:
+        - deploy_result is failed
+        - "'only updates to Labels are allowed' not in (deploy_result.stderr | default(''))"
+
+    - name: Warn that MySQL replica config requires container restart to take effect
+      ansible.builtin.debug:
+        msg: >
+          NOTE: MySQL replica config changes require the replica container to restart
+          to load the new my.cnf. If replication does not show the new setting,
+          run: docker service update --force {{ stack_name }}_mysql-replica
+      tags: [fault3, mysql]

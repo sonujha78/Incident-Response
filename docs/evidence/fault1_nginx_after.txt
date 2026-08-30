@@ -1,0 +1,23 @@
+=== AFTER FAULT: Nginx still routing to paused/dead crud-api-2 ===
+Sat Aug 29 03:32:48 PM IST 2026
+
+{"status":"ok","host":"9200a0fd8870"} [HTTP:200] [time:0.003053s]
+{"status":"ok","host":"9200a0fd8870"} [HTTP:200] [time:5.005561s]
+{"status":"ok","host":"9200a0fd8870"} [HTTP:200] [time:0.002568s]
+{"status":"ok","host":"9200a0fd8870"} [HTTP:200] [time:5.008167s]
+{"status":"ok","host":"9200a0fd8870"} [HTTP:200] [time:0.001931s]
+{"status":"ok","host":"9200a0fd8870"} [HTTP:200] [time:5.008769s]
+{"status":"ok","host":"9200a0fd8870"} [HTTP:200] [time:0.003598s]
+{"status":"ok","host":"9200a0fd8870"} [HTTP:200] [time:5.010409s]
+{"status":"ok","host":"9200a0fd8870"} [HTTP:200] [time:0.001409s]
+{"status":"ok","host":"9200a0fd8870"} [HTTP:200] [time:5.008460s]
+{"status":"ok","host":"9200a0fd8870"} [HTTP:200] [time:0.001734s]
+{"status":"ok","host":"9200a0fd8870"} [HTTP:200] [time:5.009245s]
+{"status":"ok","host":"9200a0fd8870"} [HTTP:200] [time:0.003069s]
+{"status":"ok","host":"9200a0fd8870"} [HTTP:200] [time:5.009823s]
+{"status":"ok","host":"9200a0fd8870"} [HTTP:200] [time:0.001536s]
+{"status":"ok","host":"9200a0fd8870"} [HTTP:200] [time:5.009197s]
+{"status":"ok","host":"9200a0fd8870"} [HTTP:200] [time:0.002107s]
+{"status":"ok","host":"9200a0fd8870"} [HTTP:200] [time:5.008696s]
+{"status":"ok","host":"9200a0fd8870"} [HTTP:200] [time:0.002222s]
+{"status":"ok","host":"9200a0fd8870"} [HTTP:200] [time:5.009370s]

@@ -1,0 +1,12 @@
+=== EVIDENCE: Direct 502 with proxy_next_upstream off (no retry masking) ===
+Sat Aug 29 03:41:50 PM IST 2026
+HTTP:200 time:0.002619s
+HTTP:504 time:5.006524s
+HTTP:200 time:0.003028s
+HTTP:504 time:5.004392s
+HTTP:200 time:0.002211s
+HTTP:504 time:5.006921s
+HTTP:200 time:0.002786s
+HTTP:504 time:5.004876s
+HTTP:200 time:0.002171s
+HTTP:504 time:5.004749s
